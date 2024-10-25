@@ -40,7 +40,7 @@ javascript
 const db = mysql.createConnection({
   host: '127.0.0.1', // Cambiar si se está usando otra IP
   user: 'root',       // Usuario de MySQL
-  password: 'TuContraseña',  // Contraseña de MySQL
+  password: 'SolSna260593',  // Contraseña de MySQL
   database: 'test'    // Nombre de la base de datos
 });
 
