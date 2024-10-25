@@ -108,7 +108,11 @@ CREATE TABLE Reports (
   FOREIGN KEY (idObject) REFERENCES Objects(id) ON DELETE CASCADE
 );
 
-4. Configuración del Frontend (React)
+4. COnfigurar bcrypt y jsonwebtoken
+   npm install bcryptjs jsonwebtoken
+
+   
+6. Configuración del Frontend (React)
 a) Ir a la carpeta del frontend
 
 bash
@@ -132,7 +136,8 @@ bash
 npm start
 
 Esto iniciará el servidor de desarrollo en http://localhost:3000.
-5. Resumen de librerías que se instalarán:
+
+6. Resumen de librerías que se instalarán:
 Backend (Node.js con Express):
 
 json
@@ -160,8 +165,7 @@ json
     "react-router-dom": "^6.14.1"
   }
 }
-
-6. Verificación final
+76. Verificación final
 
     Backend: Asegurarse de que el servidor se está ejecutando en http://localhost:3001 y se conecta correctamente a la base de datos.
     Frontend: El frontend de React debe ejecutarse en http://localhost:3000 y conectarse al backend.
