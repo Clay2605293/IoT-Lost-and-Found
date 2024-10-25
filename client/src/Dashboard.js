@@ -1,22 +1,47 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function Dashboard() {
-  const [name, setName] = useState('');
+  const [userData, setUserData] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Obtener el nombre almacenado en localStorage
-    const storedName = localStorage.getItem('name');
-    if (storedName) {
-      setName(storedName);
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      // Hacer una solicitud al backend para obtener los datos del usuario
+      axios.get('http://localhost:3001/user', {
+        headers: {
+          Authorization: `Bearer ${token}` // Enviar el token JWT en la cabecera
+        }
+      })
+      .then(response => {
+        setUserData(response.data); // Guardar los datos del usuario en el estado
+      })
+      .catch(err => {
+        setError('Error al cargar los datos del usuario');
+        console.error('Error al obtener los datos del usuario:', err);
+      });
     } else {
-      // Si no hay nombre, redirigir al login
-      window.location.href = '/';
+      setError('No se encontró el token de autenticación. Inicia sesión nuevamente.');
     }
   }, []);
 
+  if (error) {
+    return <p style={{ color: 'red' }}>{error}</p>;
+  }
+
   return (
-    <div className="Dashboard">
-      <h1>Bienvenido, {name}</h1>
+    <div>
+      {userData ? (
+        <div>
+          <h1>Bienvenido, {userData.Name}</h1> {/* Corregido a 'Name' con mayúscula */}
+
+          {/* Puedes mostrar más datos del usuario aquí */}
+        </div>
+      ) : (
+        <p>Cargando...</p>
+      )}
     </div>
   );
 }

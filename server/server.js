@@ -1,17 +1,17 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-const bcrypt = require('bcrypt'); // Volvemos a usar bcrypt para encriptar las contraseñas
-const jwt = require('jsonwebtoken'); // Para manejar autenticación con JWT
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const JWT_SECRET = 'clave-secreta-del-jwt'; // Cambia esto por una clave secreta más segura
 
 // Configurar CORS para permitir solicitudes desde el frontend
 app.use(cors({
-  origin: 'http://localhost:3000', // Permitir solicitudes desde localhost
-  methods: ['GET', 'POST'],        // Métodos permitidos
-  allowedHeaders: ['Content-Type'] // Encabezados permitidos
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'] // Incluir el header Authorization para enviar el token
 }));
 
 app.use(express.json()); // Para manejar JSON en las solicitudes
@@ -33,7 +33,7 @@ db.connect(err => {
   console.log('Conexión exitosa a la base de datos');
 });
 
-// Ruta para el login (verificación de Matrícula y contraseña usando bcrypt)
+// Ruta para el login
 app.post('/login', (req, res) => {
   const { Matricula, password } = req.body;
 
@@ -61,16 +61,48 @@ app.post('/login', (req, res) => {
         return res.status(401).send('Contraseña incorrecta');
       }
 
-      // Si la contraseña es correcta, crear un token JWT
-      const token = jwt.sign({ Matricula: user.Matricula }, JWT_SECRET, { expiresIn: '1h' });
+      // Si la contraseña es correcta, crear un token JWT con la Matrícula y el Nombre
+      const token = jwt.sign({ matricula: user.Matricula, name: user.Name }, JWT_SECRET, { expiresIn: '1h' });
 
-      // Enviar el token al cliente
-      res.json({ token });
+      // Enviar el token y el nombre al cliente
+      res.json({ token, name: user.Name });
     });
   });
 });
 
-// Ruta opcional para registrar un nuevo usuario (guarda la contraseña usando bcrypt)
+// Ruta para obtener los datos del usuario autenticado
+app.get('/user', (req, res) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Obtener el token de la cabecera
+
+  if (!token) {
+    return res.status(403).json({ message: 'Token no proporcionado' });
+  }
+
+  // Verificar el token JWT
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Token inválido' });
+    }
+
+    const matricula = decoded.matricula; // Obtener la Matrícula del token decodificado
+
+    // Consultar los datos del usuario en la base de datos usando la Matrícula
+    db.query('SELECT * FROM Users WHERE Matricula = ?', [matricula], (err, results) => {
+      if (err) {
+        console.log('Error en la consulta a la base de datos:', err);
+        return res.status(500).json({ message: 'Error al obtener los datos del usuario' });
+      }
+      
+      if (results.length > 0) {
+        res.json(results[0]); // Enviar los datos del usuario al frontend
+      } else {
+        res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+    });
+  });
+});
+
+// Ruta para registrar un nuevo usuario (guarda la contraseña usando bcrypt)
 app.post('/register', (req, res) => {
   const { Matricula, password, name } = req.body;
 

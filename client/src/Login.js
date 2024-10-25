@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Cambiar useHistory por useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [matricula, setMatricula] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Cambiar a useNavigate para redirigir
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   // Función para manejar el login
   const handleLogin = (e) => {
     e.preventDefault();
     axios.post('http://localhost:3001/login', { Matricula: matricula, password })
       .then(response => {
-        const { token, name } = response.data;
-        localStorage.setItem('token', token); // Guardar el token en localStorage
-        localStorage.setItem('name', name); // Guardar el nombre en localStorage
+        const { token } = response.data; // Obtenemos solo el token
+        localStorage.setItem('token', token); // Guardamos el token en localStorage
+        setMessage('Login exitoso');
         setError('');
-        navigate('/dashboard'); // Redirigir a la pantalla principal
+        navigate('/dashboard'); // Redirigir al dashboard después del login exitoso
       })
       .catch(err => {
         setError('Matrícula o contraseña incorrectos');
@@ -26,8 +27,8 @@ function Login() {
   };
 
   return (
-    <div className="Login">
-      <h1>Iniciar Sesión</h1>
+    <div>
+      <h1>Login</h1>
       <form onSubmit={handleLogin}>
         <input
           type="text"
@@ -47,8 +48,8 @@ function Login() {
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {message && <p style={{ color: 'green' }}>{message}</p>}
 
-      {/* Enlace para redirigir al registro */}
       <button onClick={() => navigate('/registro')}>
         ¿No tienes cuenta? Regístrate
       </button>

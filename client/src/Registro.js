@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Cambiar useHistory por useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function Registro() {
   const [matricula, setMatricula] = useState('');
@@ -8,7 +8,7 @@ function Registro() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate(); // Cambiar a useNavigate para redirigir
+  const navigate = useNavigate();
 
   // Función para manejar el registro
   const handleRegister = (e) => {
@@ -26,7 +26,7 @@ function Registro() {
   };
 
   return (
-    <div className="Registro">
+    <div>
       <h1>Registro</h1>
       <form onSubmit={handleRegister}>
         <input
@@ -56,7 +56,6 @@ function Registro() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {message && <p style={{ color: 'green' }}>{message}</p>}
 
-      {/* Enlace para redirigir al login */}
       <button onClick={() => navigate('/')}>
         ¿Ya tienes cuenta? Inicia sesión
       </button>
