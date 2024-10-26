@@ -6,18 +6,19 @@ function Registro() {
   const [matricula, setMatricula] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  // Función para manejar el registro
   const handleRegister = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3001/register', { Matricula: matricula, password, name })
+    // Enviar todos los datos requeridos al backend
+    axios.post('http://localhost:3001/register', { Matricula: matricula, password, name, phone, email })
       .then(response => {
         setMessage('Usuario registrado correctamente');
         setError('');
-        navigate('/'); // Redirigir al login después del registro
       })
       .catch(err => {
         setError('Error al registrar usuario');
@@ -27,7 +28,7 @@ function Registro() {
 
   return (
     <div>
-      <h1>Registro</h1>
+      <h2>Registro de Usuario</h2>
       <form onSubmit={handleRegister}>
         <input
           type="text"
@@ -50,12 +51,24 @@ function Registro() {
           onChange={(e) => setName(e.target.value)}
           required
         />
+        <input
+          type="text"
+          placeholder="Teléfono"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Correo Electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
         <button type="submit">Registrar</button>
       </form>
-
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {message && <p style={{ color: 'green' }}>{message}</p>}
-
       <button onClick={() => navigate('/')}>
         ¿Ya tienes cuenta? Inicia sesión
       </button>

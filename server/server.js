@@ -104,26 +104,33 @@ app.get('/user', (req, res) => {
 
 // Ruta para registrar un nuevo usuario (guarda la contraseña usando bcrypt)
 app.post('/register', (req, res) => {
-  const { Matricula, password, name } = req.body;
+  const { Matricula, password, name, phone, email } = req.body;
 
-  // Encriptar la contraseña usando bcrypt
+  if (!Matricula || !password || !name || !phone || !email) {
+    return res.status(400).send('Todos los campos son requeridos');
+  }
+
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) {
       console.error('Error al encriptar la contraseña:', err);
       return res.status(500).send('Error al registrar usuario');
     }
 
-    // Guardar el usuario con la matrícula y la contraseña encriptada
-    db.query('INSERT INTO Users (Matricula, Password, Name) VALUES (?, ?, ?)', [Matricula, hash, name], (err, results) => {
-      if (err) {
-        console.error('Error al insertar usuario:', err);
-        return res.status(500).send('Error al registrar usuario');
-      }
+    db.query(
+      'INSERT INTO Users (Matricula, Password, Name, Phone, Email) VALUES (?, ?, ?, ?, ?)',
+      [Matricula, hash, name, phone, email],
+      (err, results) => {
+        if (err) {
+          console.error('Error al insertar usuario en la base de datos:', err);
+          return res.status(500).send('Error al registrar usuario');
+        }
 
-      res.send('Usuario registrado correctamente');
-    });
+        res.send('Usuario registrado correctamente');
+      }
+    );
   });
 });
+
 
 // Iniciar el servidor en el puerto 3001
 const PORT = 3001;

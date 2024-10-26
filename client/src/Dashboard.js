@@ -35,9 +35,7 @@ function Dashboard() {
     <div>
       {userData ? (
         <div>
-          <h1>Bienvenido, {userData.Name}</h1> {/* Corregido a 'Name' con mayúscula */}
-
-          {/* Puedes mostrar más datos del usuario aquí */}
+          <h1>Bienvenido, {userData.Name}</h1> 
         </div>
       ) : (
         <p>Cargando...</p>
