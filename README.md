@@ -112,7 +112,7 @@ CREATE TABLE Reports (
    npm install bcryptjs jsonwebtoken
 
    
-6. Configuración del Frontend (React)
+5. Configuración del Frontend (React)
 a) Ir a la carpeta del frontend
 
 bash
