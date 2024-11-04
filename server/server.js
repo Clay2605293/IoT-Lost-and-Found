@@ -131,6 +131,31 @@ app.post('/register', (req, res) => {
   });
 });
 
+app.post('/product', (req, res) => {
+  const { matricula, Status, Foto } = req.body; // Asegúrate de que coincidan los nombres
+
+  if (!matricula || !Status || !Foto) {
+    return res.status(400).send('Todos los campos son requeridos');
+  }
+
+  db.query(
+    'INSERT INTO Objects (Matricula, Status, Foto) VALUES (?, ?, ?)',
+    [matricula, Status, Foto],
+    (err, results) => {
+      if (err) {
+        console.error('Error al registrar el producto:', err);
+        return res.status(500).send('Error al registrar producto en la base de datos');
+      }
+      res.send('Producto registrado correctamente');
+    }
+  );
+});
+
+
+
+
+
+
 
 // Iniciar el servidor en el puerto 3001
 const PORT = 3001;
