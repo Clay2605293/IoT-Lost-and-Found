@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,19 +6,25 @@ function Login() {
   const [matricula, setMatricula] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const navigate = useNavigate();
+
+  // Verificar si el usuario ya está logueado
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Redirigir al Dashboard si el token existe
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   // Función para manejar el login
   const handleLogin = (e) => {
     e.preventDefault();
     axios.post('http://localhost:3001/login', { Matricula: matricula, password })
       .then(response => {
-        const { token } = response.data; // Obtenemos solo el token
-        localStorage.setItem('token', token); // Guardamos el token en localStorage
-        setMessage('Login exitoso');
-        setError('');
-        navigate('/dashboard'); // Redirigir al dashboard después del login exitoso
+        const token = response.data.token;
+        localStorage.setItem('token', token); // Guardar el token en localStorage
+        navigate('/dashboard'); // Redirigir al Dashboard después de iniciar sesión
       })
       .catch(err => {
         setError('Matrícula o contraseña incorrectos');
@@ -28,7 +34,7 @@ function Login() {
 
   return (
     <div>
-      <h1>Login</h1>
+      <h2>Iniciar Sesión</h2>
       <form onSubmit={handleLogin}>
         <input
           type="text"
@@ -44,15 +50,9 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit">Iniciar Sesión</button>
       </form>
-
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      {message && <p style={{ color: 'green' }}>{message}</p>}
-
-      <button onClick={() => navigate('/registro')}>
-        ¿No tienes cuenta? Regístrate
-      </button>
     </div>
   );
 }
