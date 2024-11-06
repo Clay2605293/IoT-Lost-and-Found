@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import "styles/SignUpIn.ccs";
 
 function Login() {
   const [matricula, setMatricula] = useState('');
@@ -33,26 +34,42 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Iniciar Sesión</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Matrícula"
-          value={matricula}
-          onChange={(e) => setMatricula(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Iniciar Sesión</button>
-      </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="container">
+      <div className="c1">
+        <div className="c11">
+          <h1 className="mainhead">LOST AND FOUND</h1>
+        </div>
+        <div className="c2">
+          <form className="signin" onSubmit={handleLogin}>
+            <h1 className="signup1">SIGN IN</h1>
+            <br /><br /><br /><br />
+            <input
+              name="username"
+              type="text"
+              placeholder="Matrícula*"
+              className="username"
+              value={matricula}
+              onChange={(e) => setMatricula(e.target.value)}
+              required
+            />
+            <input
+              name="password"
+              type="password"
+              placeholder="Contraseña*"
+              className="username"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button type="submit" className="btn">Get Started</button>
+            <br /><br /><br /><br />
+            <a href="">
+              <p className="signup2">Forget Password?</p>
+            </a>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
