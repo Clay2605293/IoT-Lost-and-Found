@@ -2,12 +2,20 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode-generator';
+import ReactModal from 'react-modal';
+
+ReactModal.setAppElement('#root'); // Configura el elemento raíz para accesibilidad
 
 function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [userProducts, setUserProducts] = useState([]);
   const [selectedQR, setSelectedQR] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null); // Estado para el producto seleccionado
   const [error, setError] = useState('');
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editType, setEditType] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,6 +62,59 @@ function Dashboard() {
     qr.addData(`http://localhost:3001/api/products/${product.id}`);
     qr.make();
     setSelectedQR(qr.createDataURL());
+    setIsQRModalOpen(true);
+  };
+
+  const handleEdit = (product) => {
+    setSelectedProduct(product); // Selecciona el producto para editar
+    setEditName(product.Name); // Rellena el formulario con datos actuales
+    setEditType(product.Type);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateProduct = () => {
+    // Lógica para actualizar el producto en la base de datos
+    axios.put(`http://localhost:3001/api/product/${selectedProduct.id}`, {
+      Name: editName,
+      Type: editType
+    })
+    .then(() => {
+      // Actualiza el estado de los productos sin recargar
+      setUserProducts(prevProducts =>
+        prevProducts.map(p => (p.id === selectedProduct.id ? { ...p, Name: editName, Type: editType } : p))
+      );
+      setIsEditModalOpen(false);
+      setSelectedProduct(null);
+    })
+    .catch(err => {
+      console.error('Error al actualizar el producto:', err);
+      setError('Error al actualizar el producto');
+    });
+  };
+
+  const handleDeleteProduct = () => {
+    // Lógica para eliminar el producto
+    axios.delete(`http://localhost:3001/api/product/${selectedProduct.id}`)
+    .then(() => {
+      // Elimina el producto del estado sin recargar
+      setUserProducts(prevProducts => prevProducts.filter(p => p.id !== selectedProduct.id));
+      setIsEditModalOpen(false);
+      setSelectedProduct(null);
+    })
+    .catch(err => {
+      console.error('Error al eliminar el producto:', err);
+      setError('Error al eliminar el producto');
+    });
+  };
+
+  const closeModal = () => {
+    setIsQRModalOpen(false);
+    setSelectedQR(null);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedProduct(null);
   };
 
   if (error) {
@@ -71,18 +132,69 @@ function Dashboard() {
               <li key={product.id}>
                 {product.Name} - {product.Type} - {product.Status}
                 <button onClick={() => handleShowQR(product)}>Ver QR</button>
-                <button onClick={() => console.log("Abrir modal para editar/borrar")}>Editar/Borrar</button>
+                <button onClick={() => handleEdit(product)}>Editar/Borrar</button>
               </li>
             ))}
           </ul>
 
-          {selectedQR && (
-            <div>
-              <h3>Código QR para el objeto seleccionado:</h3>
-              <img src={selectedQR} alt="QR Code" />
-              <button onClick={() => setSelectedQR(null)}>Cerrar QR</button>
-            </div>
-          )}
+          {/* Modal para QR */}
+          <ReactModal
+            isOpen={isQRModalOpen}
+            onRequestClose={closeModal}
+            contentLabel="Código QR"
+            style={{
+              content: {
+                top: '50%',
+                left: '50%',
+                right: 'auto',
+                bottom: 'auto',
+                marginRight: '-50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center'
+              }
+            }}
+          >
+            <h3>Código QR para el objeto seleccionado:</h3>
+            {selectedQR && <img src={selectedQR} alt="QR Code" style={{ width: '150px', height: '150px' }} />}
+            <button onClick={closeModal}>Cerrar</button>
+          </ReactModal>
+
+          {/* Modal para Editar/Borrar */}
+          <ReactModal
+            isOpen={isEditModalOpen}
+            onRequestClose={closeEditModal}
+            contentLabel="Editar/Borrar Producto"
+            style={{
+              content: {
+                top: '50%',
+                left: '50%',
+                right: 'auto',
+                bottom: 'auto',
+                marginRight: '-50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center'
+              }
+            }}
+          >
+            <h3>Editar Producto</h3>
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Nombre del producto"
+            />
+            <select value={editType} onChange={(e) => setEditType(e.target.value)}>
+              <option value="Dispositivo electrónico">Dispositivo electrónico</option>
+              <option value="Mochila">Mochila</option>
+              <option value="Recipiente de comida">Recipiente de comida</option>
+              <option value="Recipiente de bebida">Recipiente de bebida</option>
+              <option value="Objeto personal">Objeto personal</option>
+              <option value="Otros">Otros</option>
+            </select>
+            <button onClick={handleUpdateProduct}>Actualizar</button>
+            <button onClick={handleDeleteProduct} style={{ backgroundColor: 'red', color: 'white' }}>Eliminar</button>
+            <button onClick={closeEditModal}>Cancelar</button>
+          </ReactModal>
         </div>
       ) : (
         <p>Cargando...</p>
