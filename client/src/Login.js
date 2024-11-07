@@ -20,7 +20,7 @@ function Login() {
   // Función para manejar el login
   const handleLogin = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3001/login', { Matricula: matricula, password })
+    axios.post('http://localhost:3001/auth/login', { Matricula: matricula, password })
       .then(response => {
         const token = response.data.token;
         localStorage.setItem('token', token); // Guardar el token en localStorage

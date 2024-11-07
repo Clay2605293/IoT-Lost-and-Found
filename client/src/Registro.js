@@ -15,15 +15,16 @@ function Registro() {
   const handleRegister = (e) => {
     e.preventDefault();
     // Enviar todos los datos requeridos al backend
-    axios.post('http://localhost:3001/register', { Matricula: matricula, password, name, phone, email })
-      .then(response => {
-        setMessage('Usuario registrado correctamente');
-        setError('');
-      })
-      .catch(err => {
-        setError('Error al registrar usuario');
-        console.error('Error en el registro:', err);
-      });
+    axios.post('http://localhost:3001/auth/register', { Matricula: matricula, password, name, phone, email })
+    .then(response => {
+      setMessage('Usuario registrado correctamente');
+      setError('');
+    })
+    .catch(err => {
+      setError('Error al registrar usuario');
+      console.error('Error en el registro:', err);
+    });
+
   };
 
   return (

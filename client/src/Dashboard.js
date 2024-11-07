@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const [userData, setUserData] = useState(null);
+  const [userProducts, setUserProducts] = useState([]); // Estado para almacenar los productos
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -11,20 +12,32 @@ function Dashboard() {
     const token = localStorage.getItem('token');
 
     if (token) {
-      // Solicitud al backend para obtener los datos del usuario
-      axios.get('http://localhost:3001/auth/user', {  // Cambia /user por /auth/user
+      // Solicitud para obtener los datos del usuario
+      axios.get('http://localhost:3001/auth/user', {
         headers: {
-          Authorization: `Bearer ${token}` // Enviar el token JWT en la cabecera
+          Authorization: `Bearer ${token}`
         }
       })
       .then(response => {
-        setUserData(response.data); // Guardar los datos del usuario en el estado
+        setUserData(response.data);
+
+        // Después de obtener los datos del usuario, obtener los productos asociados
+        axios.get(`http://localhost:3001/api/products/${response.data.Matricula}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(productResponse => {
+          setUserProducts(productResponse.data);
+        })
+        .catch(err => {
+          console.error('Error al obtener los objetos del usuario:', err);
+        });
       })
       .catch(err => {
         if (err.response && err.response.status === 401) {
-          // Si el error es 401, elimina el token y redirige al login
           localStorage.removeItem('token');
-          navigate('/'); // Redirige al login
+          navigate('/');
         } else {
           setError('Error al cargar los datos del usuario');
           console.error('Error al obtener los datos del usuario:', err);
@@ -44,7 +57,15 @@ function Dashboard() {
     <div>
       {userData ? (
         <div>
-          <h1>Bienvenido, {userData.Name}</h1> 
+          <h1>Bienvenido, {userData.Name}</h1>
+          <h2>Tus objetos:</h2>
+          <ul>
+            {userProducts.map((product) => (
+              <li key={product.id}>
+                {product.Name} - {product.Type} - {product.Status}
+              </li>
+            ))}
+          </ul>
         </div>
       ) : (
         <p>Cargando...</p>

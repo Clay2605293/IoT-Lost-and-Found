@@ -1,29 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function AltaProducto() {
-  const [status, setStatus] = useState('perdido'); // Estado predeterminado
-  const [foto, setFoto] = useState('');
+  const [name, setName] = useState(''); // Nombre del producto
+  const [type, setType] = useState('Dispositivo electrónico'); // Tipo predeterminado
+  const [matricula, setMatricula] = useState(''); // Matrícula dinámica
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  // Obtener la matrícula del token
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1])); // Decodifica el JWT
+      setMatricula(payload.matricula); // Asigna la matrícula desde el payload
+    }
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Datos del producto
+    // Datos del producto con Status fijo en 'encontrado'
     const productData = {
-      matricula: 'A01220835', // Matricula estática, puedes cambiarla o hacerla dinámica
-      Status: status,
-      Foto: foto
+      matricula: matricula,
+      Name: name,
+      Status: 'encontrado',
+      Type: type
     };
 
     // Llamada al backend para almacenar el producto
-    axios.post('http://localhost:3001/product', productData)
+    axios.post('http://localhost:3001/api/product', productData)
       .then(response => {
         setMessage('Producto registrado correctamente');
         setError('');
-        setStatus('perdido');
-        setFoto('');
+        setName('');
+        setType('Dispositivo electrónico');
       })
       .catch(err => {
         setError('Error al registrar el producto');
@@ -36,17 +47,21 @@ function AltaProducto() {
     <div>
       <h2>Alta de Producto</h2>
       <form onSubmit={handleSubmit}>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} required>
-          <option value="perdido">Perdido</option>
-          <option value="encontrado">Encontrado</option>
-        </select>
         <input
           type="text"
-          placeholder="Foto (URL o nombre del archivo)"
-          value={foto}
-          onChange={(e) => setFoto(e.target.value)}
+          placeholder="Nombre del producto"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
         />
+        <select value={type} onChange={(e) => setType(e.target.value)} required>
+          <option value="Dispositivo electrónico">Dispositivo electrónico</option>
+          <option value="Mochila">Mochila</option>
+          <option value="Recipiente de comida">Recipiente de comida</option>
+          <option value="Recipiente de bebida">Recipiente de bebida</option>
+          <option value="Objeto personal">Objeto personal</option>
+          <option value="Otros">Otros</option>
+        </select>
         <button type="submit">Registrar Producto</button>
       </form>
       {message && <p style={{ color: 'green' }}>{message}</p>}
