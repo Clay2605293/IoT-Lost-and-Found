@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import QRCode from 'qrcode-generator';
 
 function Dashboard() {
   const [userData, setUserData] = useState(null);
-  const [userProducts, setUserProducts] = useState([]); // Estado para almacenar los productos
+  const [userProducts, setUserProducts] = useState([]);
+  const [selectedQR, setSelectedQR] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -12,7 +14,6 @@ function Dashboard() {
     const token = localStorage.getItem('token');
 
     if (token) {
-      // Solicitud para obtener los datos del usuario
       axios.get('http://localhost:3001/auth/user', {
         headers: {
           Authorization: `Bearer ${token}`
@@ -21,7 +22,6 @@ function Dashboard() {
       .then(response => {
         setUserData(response.data);
 
-        // Después de obtener los datos del usuario, obtener los productos asociados
         axios.get(`http://localhost:3001/api/products/${response.data.Matricula}`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -49,6 +49,13 @@ function Dashboard() {
     }
   }, [navigate]);
 
+  const handleShowQR = (product) => {
+    const qr = QRCode(0, 'L');
+    qr.addData(`http://localhost:3001/api/products/${product.id}`);
+    qr.make();
+    setSelectedQR(qr.createDataURL());
+  };
+
   if (error) {
     return <p style={{ color: 'red' }}>{error}</p>;
   }
@@ -63,9 +70,19 @@ function Dashboard() {
             {userProducts.map((product) => (
               <li key={product.id}>
                 {product.Name} - {product.Type} - {product.Status}
+                <button onClick={() => handleShowQR(product)}>Ver QR</button>
+                <button onClick={() => console.log("Abrir modal para editar/borrar")}>Editar/Borrar</button>
               </li>
             ))}
           </ul>
+
+          {selectedQR && (
+            <div>
+              <h3>Código QR para el objeto seleccionado:</h3>
+              <img src={selectedQR} alt="QR Code" />
+              <button onClick={() => setSelectedQR(null)}>Cerrar QR</button>
+            </div>
+          )}
         </div>
       ) : (
         <p>Cargando...</p>
